@@ -1,0 +1,130 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(HangmanApp());
+}
+
+class HangmanApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Hangman',
+      home: HangmanGame(),
+    );
+  }
+}
+
+class HangmanGame extends StatefulWidget {
+  @override
+  _HangmanGameState createState() => _HangmanGameState();
+}
+
+class _HangmanGameState extends State<HangmanGame> {
+  final String word = "flutter";
+  List<String> guesses = [];
+  int wrongGuesses = 0;
+
+  void guess(String letter) {
+    setState(() {
+      if (!guesses.contains(letter)) {
+        guesses.add(letter);
+        if (!word.contains(letter)) {
+          wrongGuesses++;
+        }
+      }
+    });
+  }
+
+  void resetGame() {
+    setState(() {
+      guesses.clear();
+      wrongGuesses = 0;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    List<String> displayedWord = word.split('').map((char) {
+      return guesses.contains(char) ? char : "_";
+    }).toList();
+
+    bool gameOver = wrongGuesses >= 6;
+    bool gameWon = !displayedWord.contains("_");
+
+    return Scaffold(
+      appBar: AppBar(title: Text('Hangman')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (wrongGuesses > 0) 
+              Image.asset(
+                'assets/hangman_${wrongGuesses}.png',
+                height: 200,
+              ),
+            SizedBox(height: 20),
+            Text(displayedWord.join(' '), style: TextStyle(fontSize: 40)),
+            SizedBox(height: 20),
+            Text('Wrong guesses: $wrongGuesses'),
+            SizedBox(height: 20),
+            Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    for (var letter in 'abcdefghijklm'.split(''))
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: SizedBox(
+                          width: 40,
+                          height: 40,
+                          child: ElevatedButton(
+                            onPressed: (guesses.contains(letter) || gameOver || gameWon)
+                                ? null
+                                : () => guess(letter),
+                            child: Text(letter.toUpperCase(),
+                                textAlign: TextAlign.center),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                SizedBox(height: 10), 
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    for (var letter in 'nopqrstuvwxyz'.split(''))
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: SizedBox(
+                          width: 40,
+                          height: 40,
+                          child: ElevatedButton(
+                            onPressed: (guesses.contains(letter) || gameOver || gameWon)
+                                ? null
+                                : () => guess(letter),
+                            child: Text(letter.toUpperCase(),
+                                textAlign: TextAlign.center),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+            SizedBox(height: 20),
+            if (gameOver)
+              Text('Game Over!', style: TextStyle(fontSize: 24, color: Colors.red)),
+            if (gameWon)
+              Text('You Win!', style: TextStyle(fontSize: 24, color: Colors.green)),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: resetGame,
+              child: Text('Reset Game'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
